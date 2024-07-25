@@ -1,31 +1,42 @@
 import sys
-import random
-from PySide6 import QtCore, QtWidgets, QtGui
-import src.BackEnd.dummy
+from PyQt5.QtWidgets import QApplication, QMainWindow
+# from PyQt5.QtCore import Qt
+from src.BackEnd import screen_utils
 
-class MyWidget(QtWidgets.QWidget):
+
+class Window:
     def __init__(self):
-        super().__init__()
+        _get_info_instance = screen_utils.get_info()
+        self.screen_x, self.screen_y, self.window_width, self.window_height =\
+            _get_info_instance.window_geometry(80, 60)
+        self.monitor_id = 0
 
-        self.hello = ["Hallo Welt", "Hei maailma", "Hola Mundo", "Привет мир"]
+    def root(self):
+        app = QApplication(sys.argv)
 
-        self.button = QtWidgets.QPushButton("Click me!")
-        self.text = QtWidgets.QLabel("Hello World", alignment=QtCore.Qt.AlignCenter)
+        mainwindow = QMainWindow()
+        mainwindow.setGeometry(self.screen_x, self.screen_y, self.window_width, self.window_height)
 
-        self.layout = QtWidgets.QVBoxLayout(self)
-        self.layout.addWidget(self.text)
-        self.layout.addWidget(self.button)
+        screens = QApplication.screens()
 
-        self.button.clicked.connect(self.magic)
+        if self.monitor_id < len(screens):
+            screen_geometry = screens[self.monitor_id].geometry()
+            screen_center = screen_geometry.center()
 
-    @QtCore.Slot()
-    def magic(self):
-        self.text.setText(random.choice(self.hello))
+            # Nastavení geometrie okna
+            window_geometry = mainwindow.frameGeometry()
+            window_geometry.moveCenter(screen_center)
+            mainwindow.move(window_geometry.topLeft())
+        else:
+            print(f"Monitor ID {self.monitor_id} neexistuje.")
+            return
+
+        mainwindow.setWindowTitle("Ryu's Foo thing")
+        mainwindow.show()
+
+        sys.exit(app.exec())
 
 
 def run():
-    app = QtWidgets.QApplication([])
-    widget = MyWidget()
-    widget.resize(800, 600)
-    widget.show()
-    sys.exit(app.exec())
+    window_instance = Window()
+    window_instance.root()
