@@ -21,6 +21,10 @@ class get_info:
         window_x = int(self.screen_width * division_x)
         window_y = int(self.screen_height * division_y)
 
+        # minimal possible window size
+        min_x = int(self.screen_height * 0.20)
+        min_y = int(self.screen_width * 0.20)
+
         # I am returning screen poss. for x and y as 0, because in frontend there is qt function that should center the
         # app better than my function (it was not counting with titlebar somehow)
-        return 0, 0, window_x, window_y
+        return 0, 0, window_x, window_y, min_y, min_x

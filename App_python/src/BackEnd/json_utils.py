@@ -55,7 +55,7 @@ class actions:
     def write_default_json(self, path):
         # percentage out of whole screen for app dimensions:
         # first is percentage for X_axis, then for Y_axis
-        window_percentage = [50, 50]
+        window_percentage = [80, 60]
         dictionary = {
             'database_config': {
                 "Port": 6969,
@@ -64,10 +64,11 @@ class actions:
             'FrontEnd_config': {
                 "App_window": window_percentage.copy(),
                 "App_def_screenId": 0,
+                "Background_color_hex": "#9f9f9f",
 
             },
 
         }
-        json_object = json.dumps(self, dictionary, indent=4)
+        json_object = json.dumps(dictionary, indent=4)
         with open(os.path.join(path, self.json_config_name), "w+", encoding='utf-8') as outfile:
             outfile.write(json_object)
