@@ -2,24 +2,17 @@ import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5.QtCore import Qt
 from src.BackEnd import screen_utils
-import src.BackEnd.json_utils as Json_utils
 
 
 class App_window:
     def __init__(self):
-        # instance screen_utils
-        _get_info_instance = screen_utils.get_info()  # instance screen_utils
-        # instance json actions
-        Json_utils_instance = Json_utils.actions()
-        # percentil for window size
-        _length_percentage, _high_percentage = Json_utils_instance.read_config("FrontEnd_config", "App_window")
-        # screen id
-        self.monitor_id = Json_utils_instance.read_config("FrontEnd_config", "App_def_screenId")
-        # screen X/Y values
+        # instance screen_utils #########################
+        _get_info_instance = screen_utils.get_info()
+        # Get monitor ID, root window color in HEX #########################
+        self.monitor_id, self.background_hex = _get_info_instance.rootWindow_info()
+        # Get values for window position and dimensions ###########################
         self.screen_x, self.screen_y, self.window_width, self.window_height, self.min_x, self.min_y = \
-            _get_info_instance.window_geometry(_length_percentage, _high_percentage)
-        # background color
-        self.background_hex = Json_utils_instance.read_config("FrontEnd_config", "Background_color_hex")
+            _get_info_instance.window_geometry()
 
     def root(self):
         app = QApplication(sys.argv)
