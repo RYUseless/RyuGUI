@@ -8,6 +8,8 @@ import os
 class AES_cipher():
     def __init__(self):
         self.password = "$%Tak jim řekni Roboti$%mumlAl_malíř66se_št6tc6m/_|ústech%B87&^maloval%dál"  # FOR TESTING ONLY!!!
+        self.encrypted_pool = []
+        self.decrypted_pool = []
 
     # pad with spaces at the end of the text
     # beacuse AES needs 16 byte blocks
@@ -20,10 +22,10 @@ class AES_cipher():
         return s + padding_needed * b' '  # Use bytes for padding
 
     # remove the extra spaces at the end
-    def unpad(self, s):
+    def __unpad(self, s):
         return s.rstrip()
 
-    def encrypt(self, plain_text):
+    def __encrypt(self, plain_text):
         # Convert the plain text to bytes
         plain_text_bytes = plain_text.encode('utf-8')
 
@@ -49,7 +51,7 @@ class AES_cipher():
             'iv': base64.b64encode(iv)
         }
 
-    def decrypt(self, enc_dict):
+    def __decrypt(self, enc_dict):
         # Decode the dictionary entries from base64
         salt = base64.b64decode(enc_dict['salt'])
         enc = base64.b64decode(enc_dict['cipher_text'])
@@ -65,7 +67,21 @@ class AES_cipher():
         decrypted = cipher.decrypt(enc)
 
         # Unpad the text to remove the added spaces
-        original = self.unpad(decrypted)
+        original = self.__unpad(decrypted)
 
         # Return the original text as a string
         return original.decode('utf-8')
+
+    def setter(self, ip_pool):  # this name for now, will rename later
+        print("\n\t\t--- encripter ---")
+        for ip in ip_pool:
+            encrypted_ip = self.__encrypt(ip)
+            self.encrypted_pool.append(self.__encrypt(ip))
+            print(f"Encrypted text: {encrypted_ip['cipher_text'].decode('utf-8')}")
+
+    def getter(self):  # this name for now, will rename later
+        print("\n\t\t--- decrypter ---")
+        for encrypted_data in self.encrypted_pool:
+            decrypted_ip = self.__decrypt(encrypted_data)
+            self.decrypted_pool.append(decrypted_ip)
+            print(f"Decrypted secret message: {decrypted_ip}")
