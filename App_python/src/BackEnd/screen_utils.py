@@ -4,10 +4,11 @@ from src.BackEnd import json_utils as Json_utils
 
 class get_info:
     def __init__(self):
-        self.screenID = 0  # placeholder for now
+        __Json_utils_local_instance = Json_utils.actions()  # init local instance for json utils
+        self.Json_utils_instance = __Json_utils_local_instance  # global json utils instance
+        self.screenID = __Json_utils_local_instance.read_config("FrontEnd_config", "App_def_screenId")
         self.screen_width = None
         self.screen_height = None
-        self.Json_utils_instance = Json_utils.actions()
 
     def _window_resolution(self):
         self.screen_width = get_monitors()[self.screenID].width
