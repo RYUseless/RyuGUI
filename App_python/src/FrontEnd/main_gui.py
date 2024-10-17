@@ -4,6 +4,7 @@ from PyQt5.QtCore import Qt
 from src.BackEnd import screen_utils
 
 
+
 class App_window:
     def __init__(self):
         # instance screen_utils #########################
@@ -23,8 +24,9 @@ class App_window:
         main_window.setMinimumSize(self.min_x, self.min_y)
 
         screens = QApplication.screens()
+        print("monitor id is:", self.monitor_id)
 
-        if self.monitor_id < len(screens):
+        if self.monitor_id <= len(screens):
             screen_geometry = screens[self.monitor_id].geometry()
             screen_center = screen_geometry.center()
 

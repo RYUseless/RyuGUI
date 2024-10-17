@@ -1,85 +1,71 @@
-from Crypto.Cipher import AES
-from Crypto import Random
+import os
 import base64
 import hashlib
-import os
+from Crypto.Cipher import AES
+from Crypto.Random import get_random_bytes
 
 
-class AES_cipher():
+class AES_cipher:
     def __init__(self):
         self.password = "$%Tak jim řekni Roboti$%mumlAl_malíř66se_št6tc6m/_|ústech%B87&^maloval%dál"  # FOR TESTING ONLY!!!
         self.encrypted_pool = []
         self.decrypted_pool = []
 
-    # pad with spaces at the end of the text
-    # beacuse AES needs 16 byte blocks
-    @staticmethod
-    def pad(s):
-        block_size = 16
-        remainder = len(s) % block_size
-        padding_needed = block_size - remainder
-        # Return the bytes with padding
-        return s + padding_needed * b' '  # Use bytes for padding
-
-    # remove the extra spaces at the end
-    def __unpad(self, s):
-        return s.rstrip()
-
     def __encrypt(self, plain_text):
-        # Convert the plain text to bytes
+        # plain text → bytes convertion
         plain_text_bytes = plain_text.encode('utf-8')
 
-        # Generate a random salt
-        salt = os.urandom(AES.block_size)
+        # Generating salt for entropy
+        salt = os.urandom(16)  # 16 bytes for salt
 
-        # Generate a random IV (initialization vector)
-        iv = Random.new().read(AES.block_size)
-
-        # Use the Scrypt KDF to get a private key from the password
+        # Use the Scrypt KDF to derive a private key from the password
         private_key = hashlib.scrypt(self.password.encode(), salt=salt, n=2 ** 14, r=8, p=1, dklen=32)
 
-        # Pad text with spaces to be valid for AES CBC mode
-        padded_text = self.pad(plain_text_bytes)
+        # Generating Nonce for AES EAX
+        nonce = get_random_bytes(16)  # 16 bytes for nonce
 
-        # Create cipher config
-        cipher_config = AES.new(private_key, AES.MODE_CBC, iv)
+        # Set AES cipher mode to EAX, add key and nonce
+        cipher = AES.new(private_key, AES.MODE_EAX, nonce=nonce)
 
-        # Return a dictionary with the encrypted text
+        # Encrypting provided text and doing integrity check (tag)
+        cipher_text, tag = cipher.encrypt_and_digest(plain_text_bytes)
+
+        # Return: encrypted text, salt, nonce, and tag
         return {
-            'cipher_text': base64.b64encode(cipher_config.encrypt(padded_text)),
-            'salt': base64.b64encode(salt),
-            'iv': base64.b64encode(iv)
+            'cipher_text': base64.b64encode(cipher_text).decode('utf-8'),
+            'salt': base64.b64encode(salt).decode('utf-8'),
+            'nonce': base64.b64encode(nonce).decode('utf-8'),
+            'tag': base64.b64encode(tag).decode('utf-8')
         }
 
     def __decrypt(self, enc_dict):
         # Decode the dictionary entries from base64
         salt = base64.b64decode(enc_dict['salt'])
-        enc = base64.b64decode(enc_dict['cipher_text'])
-        iv = base64.b64decode(enc_dict['iv'])
+        cipher_text = base64.b64decode(enc_dict['cipher_text'])
+        nonce = base64.b64decode(enc_dict['nonce'])
+        tag = base64.b64decode(enc_dict['tag'])
 
         # Generate the private key from the password and salt
         private_key = hashlib.scrypt(self.password.encode(), salt=salt, n=2 ** 14, r=8, p=1, dklen=32)
 
-        # Create the cipher config
-        cipher = AES.new(private_key, AES.MODE_CBC, iv)
+        # Create the cipher object using EAX mode
+        cipher = AES.new(private_key, AES.MODE_EAX, nonce=nonce)
 
-        # Decrypt the cipher text
-        decrypted = cipher.decrypt(enc)
+        # Decrypt the cipher text and verify the tag for integrity check
+        try:
+            decrypted_bytes = cipher.decrypt_and_verify(cipher_text, tag)
+            return decrypted_bytes.decode('utf-8')
+        except ValueError:
+            return "Decryption failed or data was tampered with."
 
-        # Unpad the text to remove the added spaces
-        original = self.__unpad(decrypted)
-
-        # Return the original text as a string
-        return original.decode('utf-8')
-
-    def setter(self, ip_pool):  # this name for now, will rename later
+    def setter(self, ip_pool):  # will think of a better name soon
         print("\n\t\t--- encripter ---")
         for ip in ip_pool:
             encrypted_ip = self.__encrypt(ip)
-            self.encrypted_pool.append(self.__encrypt(ip))
-            print(f"Encrypted text: {encrypted_ip['cipher_text'].decode('utf-8')}")
+            self.encrypted_pool.append(encrypted_ip)
+            print(f"Encrypted text: {encrypted_ip['cipher_text']}")
 
-    def getter(self):  # this name for now, will rename later
+    def getter(self):  # will think of a better name soon
         print("\n\t\t--- decrypter ---")
         for encrypted_data in self.encrypted_pool:
             decrypted_ip = self.__decrypt(encrypted_data)
