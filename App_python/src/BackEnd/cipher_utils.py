@@ -11,18 +11,43 @@ class AES_cipher:
         self.encrypted_pool = []
         self.decrypted_pool = []
 
+    def __pad(self, s):
+        """Pad input text using PKCS7 padding to match the block size."""
+        block_size_num = self.set_block_size(s)
+        padding_len = block_size_num - len(s) % block_size_num
+        padding = chr(padding_len) * padding_len
+        return s + padding
+
+    @staticmethod
+    def __unpad(s):
+        """Remove PKCS7 padding after decryption."""
+        padding_len = ord(s[-1])
+        return s[:-padding_len]
+
+    @staticmethod
+    def set_block_size(secret):
+        secret_val = len(secret)  # count lengh only once :)
+        if secret_val <= 32:
+            print("## block size: 32")
+            return 32
+        else:
+            return_val = ((secret_val - 1) // 32 + 1) * 32  # -1 pro zaokrouhleni
+            print("## block size val:", return_val)
+            return return_val
+
     def __encrypt(self, plain_text):
-        # plain text → bytes convertion
-        plain_text_bytes = plain_text.encode('utf-8')
+        # Pad the input text to the block size
+        padded_text = self.__pad(plain_text)
+        plain_text_bytes = padded_text.encode('utf-8')
 
         # Generating salt for entropy
-        salt = os.urandom(16)  # 16 bytes for salt
+        salt = os.urandom(16)
 
         # Use the Scrypt KDF to derive a private key from the password
         private_key = hashlib.scrypt(self.password.encode(), salt=salt, n=2 ** 14, r=8, p=1, dklen=32)
 
         # Generating Nonce for AES EAX
-        nonce = get_random_bytes(16)  # 16 bytes for nonce
+        nonce = get_random_bytes(16)
 
         # Set AES cipher mode to EAX, add key and nonce
         cipher = AES.new(private_key, AES.MODE_EAX, nonce=nonce)
@@ -54,20 +79,22 @@ class AES_cipher:
         # Decrypt the cipher text and verify the tag for integrity check
         try:
             decrypted_bytes = cipher.decrypt_and_verify(cipher_text, tag)
-            return decrypted_bytes.decode('utf-8')
+            decrypted_text = decrypted_bytes.decode('utf-8')
+            return self.__unpad(decrypted_text)  # Remove padding after decryption
         except ValueError:
             return "Decryption failed or data was tampered with."
 
-    def setter(self, ip_pool):  # will think of a better name soon
-        print("\n\t\t--- encripter ---")
+    def setter(self, ip_pool):
+        print("\n\t\t--- ENCRYPTER ---")
         for ip in ip_pool:
             encrypted_ip = self.__encrypt(ip)
             self.encrypted_pool.append(encrypted_ip)
             print(f"Encrypted text: {encrypted_ip['cipher_text']}")
 
-    def getter(self):  # will think of a better name soon
-        print("\n\t\t--- decrypter ---")
+    def getter(self):
+        print("\n\t\t--- DECRYPTER ---")
         for encrypted_data in self.encrypted_pool:
             decrypted_ip = self.__decrypt(encrypted_data)
             self.decrypted_pool.append(decrypted_ip)
             print(f"Decrypted secret message: {decrypted_ip}")
+

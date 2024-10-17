@@ -15,7 +15,7 @@ if __name__ == '__main__':
     # Funny.youGotShreked()
     print("\t--- RyuGUI main caller ---")
     # # cipher testing:
-    ip_pool = ["PetrovSto#2222", "UltraMagiePlsHesloIdk"]
+    ip_pool = ["211.104.144.202", "10.80.48.14", "69.69.69.69"]
     # Initialize empty lists to store encrypted and decrypted IPs
     cipher_instance = Cipher.AES_cipher()
     # Encrypt each IP address
