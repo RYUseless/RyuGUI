@@ -5,7 +5,7 @@ import sys
 __json_config_name = "config.json"
 
 
-class actions:
+class Actions:
     def __init__(self):
         self.json_config_name = "config.json"
         self.assets_location = None
@@ -16,7 +16,6 @@ class actions:
         current_dir_name = os.path.basename(os.path.abspath(working_dir))
 
         # finding directory one bellow assets folder.
-        print(f"OS namae {sys.platform}")
         while current_dir_name != "App_python" and working_dir != "/":
             working_dir = os.path.abspath(os.path.join(working_dir, "../"))
             current_dir_name = os.path.basename(os.path.abspath(working_dir))
@@ -64,7 +63,8 @@ class actions:
             'FrontEnd_config': {
                 "App_window": window_percentage.copy(),
                 "App_def_screenId": 0,
-                "Background_color_hex": "#9f9f9f",
+                "Background_color_hex": "#1e1e1e",
+                "Font_color": "#ffffff",
 
             },
 
