@@ -37,10 +37,9 @@ class RootWindow(QMainWindow):
         self.output_text.setStyleSheet(f"color: {self.__font_color};")  # Nastavení barvy písma
 
         self.input_line = QLineEdit(self)  # Vstupní pole
-        self.input_line.setPlaceholderText("Type 'stinky' and hit Enter")  # Placeholder
+        self.input_line.setPlaceholderText("For help, type \'help\'")  # Placeholder
         self.input_line.setStyleSheet(f"color: {self.__font_color};")  # Nastavení barvy písma
 
-        # Přidání signálu pro stisknutí klávesy Enter
         self.input_line.returnPressed.connect(self.process_input)
 
         self.root_widgets()
@@ -60,16 +59,21 @@ class RootWindow(QMainWindow):
     def process_input(self):
         """Zpracovává vstup a zobrazuje parodii nebo vymaže text."""
         user_input = self.input_line.text().strip()  # Získání uživatelského vstupu
+        user_input_split = user_input.split()
+        user_input_split_second_half = []
+
+        # filter user input:
+        counter = 1
+        while counter < len(user_input_split):
+            print(counter)
+            user_input_split_second_half.append(user_input_split[counter])
+            counter += 1
 
         # Přidáme uživatelský vstup do výstupního pole
-        self.output_text.append(f">> {user_input}")
+        self.output_text.append(">> %s" % user_input)
 
-        """
-        funny commands in console like thing: it goes to commands class and search in for loop array that has names
-        of implemented "commands"        
-        """
         instance = Commands.Handler(self.output_text)
-        instance.is_function_implemented(user_input)
+        instance.is_function_implemented(user_input_split[0],  user_input_split_second_half)
 
         self.input_line.clear()  # Vymaže vstupní pole pro další vstup
 
